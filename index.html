@@ -1,0 +1,391 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>JalDrishti</title>
+
+  <style>
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef7f8;
+      text-align: center;
+      color: #123;
+    }
+
+    header {
+      background: #007c91;
+      color: white;
+      padding: 25px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      font-size: 16px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      flex-wrap: wrap;
+      margin: 40px auto;
+      max-width: 1100px;
+    }
+
+    .card {
+      background: white;
+      width: 250px;
+      padding: 30px 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+    }
+
+    .icon {
+      font-size: 45px;
+    }
+
+    .title {
+      font-size: 20px;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .value {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 15px 0;
+      color: #007c91;
+    }
+
+    .status {
+      font-size: 20px;
+      font-weight: bold;
+      padding: 12px;
+      border-radius: 10px;
+      background: #e8f5e9;
+    }
+
+    .clean {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .danger {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .footer {
+      margin-top: 30px;
+      padding: 20px;
+      color: #555;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>🌊 JalDrishti</h1>
+    <p>Real-Time Water Monitoring & Obstacle Detection</p>
+  </header>
+
+
+  <div class="container">
+
+    <!-- Temperature -->
+
+    <div class="card">
+
+      <div class="icon">🌡️</div>
+
+      <div class="title">
+        Water Temperature
+      </div>
+
+      <div class="value" id="temperature">
+        Loading...
+      </div>
+
+    </div>
+
+
+    <!-- Distance -->
+
+    <div class="card">
+
+      <div class="icon">📏</div>
+
+      <div class="title">
+        Front Distance
+      </div>
+
+      <div class="value" id="distance">
+        Loading...
+      </div>
+
+    </div>
+
+
+    <!-- Obstacle Status -->
+
+    <div class="card">
+
+      <div class="icon">🚤</div>
+
+      <div class="title">
+        Obstacle Status
+      </div>
+
+      <div class="status" id="status">
+        Checking...
+      </div>
+
+    </div>
+
+
+    <!-- Turbidity Average -->
+
+    <div class="card">
+
+      <div class="icon">💧</div>
+
+      <div class="title">
+        Turbidity Average
+      </div>
+
+      <div class="value" id="turbidityAverage">
+        Loading...
+      </div>
+
+      <p>Raw Sensor Reading</p>
+
+    </div>
+
+
+    <!-- Turbidity Water Status -->
+
+    <div class="card">
+
+      <div class="icon">🌊</div>
+
+      <div class="title">
+        Water Quality Status
+      </div>
+
+      <div class="status pending" id="turbidityStatus">
+        Checking...
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="footer">
+    JalDrishti IoT System • Live Firebase Data
+  </div>
+
+
+  <!-- Firebase -->
+
+  <script type="module">
+
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+    import {
+      getDatabase,
+      ref,
+      onValue
+    }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+
+    // Firebase Configuration
+
+    const firebaseConfig = {
+
+      apiKey: "AIzaSyB5ybpp85_TOk59Kp0syNzNUdmRyJLjNnE",
+
+      authDomain: "jaldrishti-iot.firebaseapp.com",
+
+      databaseURL:
+        "https://jaldrishti-iot-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+      projectId: "jaldrishti-iot",
+
+      storageBucket:
+        "jaldrishti-iot.firebasestorage.app",
+
+      messagingSenderId: "974713876326",
+
+      appId:
+        "1:974713876326:web:d19d545d3eb92f78c5a2a7"
+
+    };
+
+
+    // Initialize Firebase
+
+    const app = initializeApp(firebaseConfig);
+
+    const database = getDatabase(app);
+
+
+    // =========================================
+    // TEMPERATURE
+    // =========================================
+
+    const temperatureRef =
+      ref(database, "temperature");
+
+    onValue(temperatureRef, (snapshot) => {
+
+      const temperature = snapshot.val();
+
+      if (temperature !== null) {
+
+        document.getElementById("temperature").innerText =
+          Number(temperature).toFixed(2) + " °C";
+
+      }
+
+    });
+
+
+    // =========================================
+    // ULTRASONIC DISTANCE
+    // =========================================
+
+    const distanceRef =
+      ref(database, "ultrasonic/distance");
+
+    onValue(distanceRef, (snapshot) => {
+
+      const distance = snapshot.val();
+
+      if (distance !== null) {
+
+        document.getElementById("distance").innerText =
+          Number(distance).toFixed(2) + " cm";
+
+
+        // Obstacle Status
+
+        const status =
+          document.getElementById("status");
+
+        if (distance <= 50) {
+
+          status.innerText =
+            "🚨 OBSTACLE DETECTED";
+
+        }
+
+        else if (distance <= 100) {
+
+          status.innerText =
+            "⚠️ CAUTION";
+
+        }
+
+        else {
+
+          status.innerText =
+            "✅ PATH CLEAR";
+
+        }
+
+      }
+
+    });
+
+
+    // =========================================
+    // TURBIDITY AVERAGE
+    // =========================================
+
+    const turbidityAverageRef =
+      ref(database, "turbidity/average");
+
+    onValue(turbidityAverageRef, (snapshot) => {
+
+      const average = snapshot.val();
+
+      if (average !== null) {
+
+        document.getElementById("turbidityAverage").innerText =
+          average;
+
+      }
+
+    });
+
+
+    // =========================================
+    // TURBIDITY WATER STATUS
+    // =========================================
+
+    const turbidityStatusRef =
+      ref(database, "turbidity/status");
+
+    onValue(turbidityStatusRef, (snapshot) => {
+
+      const waterStatus = snapshot.val();
+
+      const statusElement =
+        document.getElementById("turbidityStatus");
+
+      statusElement.className = "status";
+
+      if (waterStatus === "CLEAN WATER") {
+
+        statusElement.innerText =
+          "✅ CLEAN WATER";
+
+        statusElement.classList.add("clean");
+
+      }
+
+      else if (waterStatus === "HIGH RISK WATER") {
+
+        statusElement.innerText =
+          "🚨 HIGH RISK WATER";
+
+        statusElement.classList.add("danger");
+
+      }
+
+      else {
+
+        statusElement.innerText =
+          "⏳ CHECKING...";
+
+        statusElement.classList.add("pending");
+
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>
